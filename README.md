@@ -34,3 +34,8 @@ For the first test, open a normal site, choose **Trust current structure**, then
 4. Add an opt-in FastAPI classifier API.
 5. Add fixtures and automated tests.
 6. Publish a public Chrome Web Store listing after security and privacy review.
+
+## Deployment
+
+- The public landing page is in \`docs/\` and can be served by GitHub Pages.
+- The optional FastAPI classifier has a Render deployment blueprint in \`render.yaml\`.
