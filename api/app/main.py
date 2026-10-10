@@ -28,6 +28,9 @@ app.add_middleware(
         "http://127.0.0.1:8000",
         "http://localhost:8000",
     ],
+    # Vercel assigns a unique HTTPS subdomain to production and preview deployments.
+    # This permits only those hosted site origins, not arbitrary websites.
+    allow_origin_regex=r"https://[a-z0-9-]+\.vercel\.app",
     allow_credentials=False,
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
