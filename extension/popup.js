@@ -10,7 +10,8 @@ const trustButton = document.querySelector("#trust-button");
 const refreshButton = document.querySelector("#refresh-button");
 const apiButton = document.querySelector("#api-button");
 const apiResult = document.querySelector("#api-result");
-const LOCAL_API_URL = "http://127.0.0.1:8000/classify";
+const API_BASE_URL = "https://baselinesentry-api.onrender.com";
+const API_CLASSIFY_URL = API_BASE_URL + "/classify";
 
 let currentReport = null;
 
@@ -147,7 +148,7 @@ async function requestApiSecondOpinion() {
   apiResult.textContent = "Sending only the selected structural signal vector…";
 
   try {
-    const response = await fetch(LOCAL_API_URL, {
+    const response = await fetch(API_CLASSIFY_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(apiFeatureVector(currentReport))
@@ -160,7 +161,7 @@ async function requestApiSecondOpinion() {
     apiResult.textContent = "API: " + result.classification + " · " + result.score + "/100. " + reason;
   } catch {
     apiResult.className = "api-result error";
-    apiResult.textContent = "The local API is unavailable. Start it at 127.0.0.1:8000, then try again.";
+    apiResult.textContent = "The online API is temporarily unavailable. Your local analysis still remains active.";
   } finally {
     apiButton.disabled = false;
     apiButton.textContent = "Ask API";
