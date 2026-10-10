@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BaselineSentry</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="panel">
+      <header>
+        <div class="brand-mark">B</div>
+        <div>
+          <p class="eyebrow">WEBSITE TRUST MONITOR</p>
+          <h1>BaselineSentry</h1>
+        </div>
+      </header>
+
+      <section class="target-card">
+        <p class="label">CURRENT SITE</p>
+        <p id="site-host" class="host">Scanning…</p>
+        <p id="site-url" class="url"></p>
+      </section>
+
+      <section class="risk-card">
+        <div>
+          <p class="label">RISK SCORE</p>
+          <p id="score" class="score">—</p>
+        </div>
+        <div id="risk-badge" class="risk-badge">ANALYSING</div>
+      </section>
+
+      <section class="baseline-card">
+        <div>
+          <p class="label">ADAPTIVE TRUST PROFILE</p>
+          <p id="baseline-status" class="baseline-status">No baseline saved for this site.</p>
+        </div>
+        <button id="trust-button" class="secondary" type="button">Trust current structure</button>
+      </section>
+
+      <section>
+        <div class="section-heading">
+          <h2>Detection evidence</h2>
+          <button id="refresh-button" class="text-button" type="button">Rescan</button>
+        </div>
+        <ol id="timeline" class="timeline"></ol>
+      </section>
+
+      <p id="error" class="error" role="alert"></p>
+      <footer>Local analysis only · No passwords or form values are read</footer>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>
+
