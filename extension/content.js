@@ -70,6 +70,8 @@
   function scanPage() {
     const parsedUrl = new URL(location.href);
     const hostname = parsedUrl.hostname;
+    const hostnameHyphenCount = (hostname.match(/-/g) || []).length;
+    const punycodeOrIpHost = hostname.startsWith("xn--") || isIpAddress(hostname);
     const forms = Array.from(document.forms).map(formMetadata);
     const resourceOrigins = thirdPartyResourceOrigins();
     const navigationEntry = performance.getEntriesByType("navigation")[0];
@@ -92,7 +94,7 @@
       timeline.push({ title: "IP-address host", detail: "The page is addressed by an IP rather than a normal domain name.", points: 18, finding: true });
     }
 
-    if ((hostname.match(/-/g) || []).length >= 3) {
+    if (hostnameHyphenCount >= 3) {
       score += 8;
       timeline.push({ title: "Unusually structured hostname", detail: "The hostname contains several hyphens.", points: 8, finding: true });
     }
@@ -147,6 +149,9 @@
       url: location.href,
       hostname,
       forms,
+      deceptiveBrandDomain: Boolean(brand),
+      punycodeOrIpHost,
+      hostnameHyphenCount,
       resourceOrigins,
       redirectCount,
       score: Math.min(100, score),

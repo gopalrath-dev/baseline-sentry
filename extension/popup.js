@@ -8,6 +8,9 @@ const errorEl = document.querySelector("#error");
 const baselineStatus = document.querySelector("#baseline-status");
 const trustButton = document.querySelector("#trust-button");
 const refreshButton = document.querySelector("#refresh-button");
+const apiButton = document.querySelector("#api-button");
+const apiResult = document.querySelector("#api-result");
+const LOCAL_API_URL = "http://127.0.0.1:8000/classify";
 
 let currentReport = null;
 
@@ -57,8 +60,15 @@ async function applyBaseline(report) {
 
   const current = formProfile(report);
   const additions = [];
+  const adaptiveFeatures = {
+    form_destination_changed: false,
+    new_sensitive_form: false,
+    redirect_to_new_domain: false,
+    new_third_party_origins: 0
+  };
 
   if (baseline.sensitiveFormCount === 0 && current.sensitiveFormCount > 0) {
+    adaptiveFeatures.new_sensitive_form = true;
     additions.push({
       title: "New credential collection structure",
       detail: "This trusted site's current structure now includes a sensitive form.",
@@ -68,6 +78,7 @@ async function applyBaseline(report) {
   }
 
   if (!sameArray(baseline.formActionOrigins, current.formActionOrigins)) {
+    adaptiveFeatures.form_destination_changed = true;
     additions.push({
       title: "Form destination changed",
       detail: "A form now submits to a different origin than the local trusted baseline.",
@@ -79,6 +90,7 @@ async function applyBaseline(report) {
   if (Array.isArray(baseline.resourceOrigins)) {
     const unfamiliarOrigins = current.resourceOrigins.filter((origin) => !baseline.resourceOrigins.includes(origin));
     if (unfamiliarOrigins.length >= 3) {
+      adaptiveFeatures.new_third_party_origins = unfamiliarOrigins.length;
       additions.push({
         title: "New third-party resource origins",
         detail: unfamiliarOrigins.length + " unfamiliar external origins appeared since this site's trusted baseline.",
@@ -89,6 +101,7 @@ async function applyBaseline(report) {
   }
 
   if (typeof baseline.redirectCount === "number" && baseline.redirectCount === 0 && current.redirectCount >= 2) {
+    adaptiveFeatures.redirect_to_new_domain = true;
     additions.push({
       title: "Redirect behaviour changed",
       detail: "This visit passed through " + current.redirectCount + " redirects, unlike the trusted baseline.",
@@ -106,11 +119,57 @@ async function applyBaseline(report) {
   }
 
   trustButton.textContent = "Update trusted structure";
+  report.adaptiveFeatures = adaptiveFeatures;
   return report;
+}
+
+function apiFeatureVector(report) {
+  const adaptive = report.adaptiveFeatures || {};
+  return {
+    has_sensitive_form: report.forms.some((form) => form.sensitive),
+    cross_origin_sensitive_form: report.forms.some((form) => form.sensitive && form.crossOrigin),
+    form_destination_changed: Boolean(adaptive.form_destination_changed),
+    new_sensitive_form: Boolean(adaptive.new_sensitive_form),
+    deceptive_brand_domain: Boolean(report.deceptiveBrandDomain),
+    punycode_or_ip_host: Boolean(report.punycodeOrIpHost),
+    redirect_to_new_domain: Boolean(adaptive.redirect_to_new_domain),
+    new_third_party_origins: Number(adaptive.new_third_party_origins || 0),
+    excessive_hostname_hyphens: Number(report.hostnameHyphenCount >= 3 ? report.hostnameHyphenCount : 0)
+  };
+}
+
+async function requestApiSecondOpinion() {
+  if (!currentReport) return;
+
+  apiButton.disabled = true;
+  apiButton.textContent = "Checking…";
+  apiResult.className = "api-result";
+  apiResult.textContent = "Sending only the selected structural signal vector…";
+
+  try {
+    const response = await fetch(LOCAL_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(apiFeatureVector(currentReport))
+    });
+    if (!response.ok) throw new Error("API returned " + response.status);
+
+    const result = await response.json();
+    const strongest = result.contributions[0];
+    const reason = strongest ? strongest.explanation : "No elevated structural signal was present.";
+    apiResult.textContent = "API: " + result.classification + " · " + result.score + "/100. " + reason;
+  } catch {
+    apiResult.className = "api-result error";
+    apiResult.textContent = "The local API is unavailable. Start it at 127.0.0.1:8000, then try again.";
+  } finally {
+    apiButton.disabled = false;
+    apiButton.textContent = "Ask API";
+  }
 }
 
 function render(report) {
   currentReport = report;
+  apiResult.textContent = "";
   siteHost.textContent = report.hostname;
   siteUrl.textContent = report.url;
   scoreEl.textContent = String(report.score);
@@ -173,4 +232,5 @@ trustButton.addEventListener("click", async () => {
 });
 
 refreshButton.addEventListener("click", scan);
+apiButton.addEventListener("click", requestApiSecondOpinion);
 scan();
