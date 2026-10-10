@@ -15,6 +15,7 @@
           <span>Baseline<span>Sentry</span></span>
         </a>
         <nav aria-label="Main navigation">
+          <a href="#link-check">Check a link</a>
           <a href="#features">Capabilities</a>
           <a href="#demo">Live logic</a>
           <a href="#privacy">Privacy</a>
@@ -62,6 +63,37 @@
           <div class="wrap proof-inner">
             <p>Not just another blacklist.</p>
             <div><span>URL</span><b>+</b><span>FORMS</span><b>+</b><span>BEHAVIOUR</span><b>+</b><span>TRUST HISTORY</span></div>
+          </div>
+        </section>
+
+        <section id="link-check" class="link-check-section">
+          <div class="wrap link-check-layout">
+            <div class="link-check-copy">
+              <p class="eyebrow">INSTANT URL CHECK</p>
+              <h2>Check a link before<br />you trust it.</h2>
+              <p>Paste a web address to inspect its visible URL and domain-deception signals locally. Nothing you enter is sent to BaselineSentry.</p>
+              <div class="check-capabilities">
+                <span>✓ Actual hostname</span>
+                <span>✓ Look-alike brand patterns</span>
+                <span>✓ Punycode and IP hosts</span>
+                <span>✓ Misleading URL structure</span>
+              </div>
+            </div>
+            <div class="link-check-card">
+              <form id="url-check-form">
+                <label for="url-check-input">WEBSITE ADDRESS</label>
+                <div class="url-input-row">
+                  <input id="url-check-input" name="url" type="url" inputmode="url" autocomplete="off" placeholder="https://example.com" required />
+                  <button class="button" type="submit">Check link <span>→</span></button>
+                </div>
+              </form>
+              <p class="check-privacy">◉ Runs in your browser · URL is not uploaded</p>
+              <div id="url-result" class="url-result empty" aria-live="polite">
+                <div class="url-result-icon">⌁</div>
+                <div><b>Ready to inspect</b><small>Enter a complete website address to begin.</small></div>
+              </div>
+              <p class="full-scan-note"><b>Need a full page scan?</b> Login forms, redirects, resources, and trusted-site changes can only be inspected from the BaselineSentry browser extension while you visit the page.</p>
+            </div>
           </div>
         </section>
 
@@ -163,4 +195,3 @@
     <script src="app.js"></script>
   </body>
 </html>
-
