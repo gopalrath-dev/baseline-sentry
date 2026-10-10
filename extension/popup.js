@@ -12,6 +12,7 @@ const apiButton = document.querySelector("#api-button");
 const apiResult = document.querySelector("#api-result");
 const reputationButton = document.querySelector("#reputation-button");
 const reputationResult = document.querySelector("#reputation-result");
+const autoScanToggle = document.querySelector("#auto-scan-toggle");
 const API_BASE_URL = "https://baselinesentry-api.onrender.com";
 const API_CLASSIFY_URL = API_BASE_URL + "/classify";
 const API_REPUTATION_URL = API_BASE_URL + "/reputation";
@@ -289,6 +290,20 @@ async function scan() {
   }
 }
 
+async function updateAutomaticScanning() {
+  const enabled = autoScanToggle.checked;
+  await chrome.storage.local.set({ autoScanEnabled: enabled });
+  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tabs[0]?.id) {
+    chrome.tabs.sendMessage(tabs[0].id, { type: "BASELINE_SENTRY_AUTO_SCAN_SETTING", enabled }).catch(() => {});
+  }
+}
+
+async function loadAutomaticScanningSetting() {
+  const stored = await chrome.storage.local.get("autoScanEnabled");
+  autoScanToggle.checked = stored.autoScanEnabled !== false;
+}
+
 trustButton.addEventListener("click", async () => {
   if (!currentReport) return;
 
@@ -304,4 +319,6 @@ trustButton.addEventListener("click", async () => {
 refreshButton.addEventListener("click", scan);
 apiButton.addEventListener("click", requestApiSecondOpinion);
 reputationButton.addEventListener("click", requestThreatReputation);
+autoScanToggle.addEventListener("change", updateAutomaticScanning);
+loadAutomaticScanningSetting();
 scan();

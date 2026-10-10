@@ -14,8 +14,9 @@ This first working extension provides:
 - An explainable evidence timeline
 - A user-triggered API second opinion that receives only minimized structural signals
 - A user-triggered threat-reputation check for the current page URL
+- Optional automatic local scanning with a bottom-right caution/high-risk warning
 
-All current analysis happens inside Chrome. The extension never reads or stores form values or passwords.
+All current analysis happens inside Chrome. The extension never reads or stores form values or passwords. Automatic scanning is enabled by default, can be turned off in the popup, and never performs an external reputation lookup without a button click.
 
 ## Run locally in Chrome
 

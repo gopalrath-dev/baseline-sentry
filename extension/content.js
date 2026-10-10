@@ -159,6 +159,77 @@
     };
   }
 
+  function localRiskLevel(score) {
+    if (score >= 80) return "CRITICAL";
+    if (score >= 60) return "HIGH";
+    if (score >= 30) return "CAUTION";
+    return "LOW";
+  }
+
+  function removeAutoWarning() {
+    document.getElementById("baseline-sentry-auto-warning")?.remove();
+  }
+
+  function showAutoWarning(report) {
+    removeAutoWarning();
+    const level = localRiskLevel(report.score);
+    if (level === "LOW") return;
+
+    const warning = document.createElement("aside");
+    warning.id = "baseline-sentry-auto-warning";
+    warning.className = "bs-auto-warning bs-" + level.toLowerCase();
+    warning.setAttribute("role", "status");
+    warning.setAttribute("aria-live", "polite");
+
+    const title = document.createElement("strong");
+    title.textContent = "BaselineSentry: " + level + " RISK · " + report.score + "/100";
+    const summary = document.createElement("p");
+    summary.textContent = "Local page scan found signals worth reviewing. No form values were read.";
+    const details = document.createElement("ul");
+    report.timeline.filter((event) => event.finding).slice(0, 3).forEach((event) => {
+      const item = document.createElement("li");
+      item.textContent = event.title;
+      details.append(item);
+    });
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "bs-auto-details";
+    toggle.textContent = "Show evidence";
+    toggle.addEventListener("click", () => {
+      const expanded = warning.classList.toggle("bs-expanded");
+      toggle.textContent = expanded ? "Hide evidence" : "Show evidence";
+    });
+    const dismiss = document.createElement("button");
+    dismiss.type = "button";
+    dismiss.className = "bs-auto-dismiss";
+    dismiss.textContent = "×";
+    dismiss.setAttribute("aria-label", "Dismiss this warning for the current page");
+    dismiss.addEventListener("click", removeAutoWarning);
+
+    warning.append(title, summary, details, toggle, dismiss);
+    const style = document.createElement("style");
+    style.textContent =
+      '#baseline-sentry-auto-warning{position:fixed;right:18px;bottom:18px;z-index:2147483646;width:min(350px,calc(100vw - 36px));padding:15px 42px 14px 16px;border:1px solid #a47636;border-radius:13px;background:#16130b;color:#fff5d3;box-shadow:0 16px 44px rgba(0,0,0,.42);font:13px/1.4 Arial,sans-serif}' +
+      '#baseline-sentry-auto-warning.bs-high{border-color:#bd674e;background:#22130f;color:#ffe3d6}' +
+      '#baseline-sentry-auto-warning.bs-critical{border-color:#d45170;background:#261019;color:#ffe1e9}' +
+      '#baseline-sentry-auto-warning strong{display:block;font-size:13px;letter-spacing:.02em}' +
+      '#baseline-sentry-auto-warning p{margin:6px 0 0;color:inherit;opacity:.88}' +
+      '#baseline-sentry-auto-warning ul{display:none;margin:10px 0 0;padding-left:17px}' +
+      '#baseline-sentry-auto-warning.bs-expanded ul{display:block}' +
+      '#baseline-sentry-auto-warning button{border:0;border-radius:7px;padding:6px 8px;margin-top:11px;background:#f6d276;color:#22180a;font:700 11px Arial,sans-serif;cursor:pointer}' +
+      '#baseline-sentry-auto-warning.bs-high button{background:#ffb894;color:#25100b}' +
+      '#baseline-sentry-auto-warning.bs-critical button{background:#ffabc0;color:#2b0c15}' +
+      '#baseline-sentry-auto-warning .bs-auto-dismiss{position:absolute;top:6px;right:8px;margin:0;padding:3px 8px;background:transparent!important;color:inherit!important;font-size:21px;line-height:1}'
+    warning.append(style);
+    document.documentElement.append(warning);
+  }
+
+  async function runAutomaticScan() {
+    const stored = await chrome.storage.local.get("autoScanEnabled");
+    if (stored.autoScanEnabled === false) return;
+    showAutoWarning(scanPage());
+  }
+
   function showSubmissionWarning(form) {
     if (document.getElementById("baseline-sentry-warning")) return;
 
@@ -211,5 +282,14 @@
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message && message.type === "BASELINE_SENTRY_SCAN") sendResponse(scanPage());
+    if (message && message.type === "BASELINE_SENTRY_AUTO_SCAN_SETTING") {
+      if (message.enabled) runAutomaticScan();
+      else removeAutoWarning();
+      sendResponse({ ok: true });
+    }
   });
+
+  window.setTimeout(() => {
+    runAutomaticScan().catch(() => {});
+  }, 700);
 })();
