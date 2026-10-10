@@ -199,6 +199,20 @@ function showBlacklistOverride(source, providerMessage) {
   }
 }
 
+function showReputationCaution(source, providerMessage) {
+  if (!currentUrlResult) return;
+  showUrlResult({
+    ...currentUrlResult,
+    score: Math.max(35, currentUrlResult.score),
+    level: "CAUTION",
+    signals: ["Reputation signal from " + source, ...currentUrlResult.signals]
+  });
+  const resultText = urlResult.querySelector("small");
+  if (resultText) {
+    resultText.textContent = "Actual registrable domain: " + currentUrlResult.domain + ". " + providerMessage;
+  }
+}
+
 urlCheckForm.addEventListener("submit", (event) => {
   event.preventDefault();
   try {
@@ -244,11 +258,15 @@ blacklistButton.addEventListener("click", async () => {
     if (!response.ok) throw new Error(body.detail || "Blacklist lookup failed.");
 
     const blacklisted = body.verdict === "BLACKLISTED";
+    const caution = body.verdict === "CAUTION";
     if (blacklisted) showBlacklistOverride(body.source, body.message);
+    if (caution) showReputationCaution(body.source, body.message);
     blacklistConsent.textContent = blacklisted
       ? "BLACKLISTED by " + body.source + ". " + body.message
-      : body.source + ": " + body.message;
-    blacklistConsent.style.color = blacklisted ? "#ffb49e" : "#9dc9bf";
+      : caution
+        ? "CAUTION from " + body.source + ". " + body.message
+        : body.source + ": " + body.message;
+    blacklistConsent.style.color = blacklisted ? "#ffb49e" : caution ? "#ffdb8a" : "#9dc9bf";
   } catch (error) {
     blacklistConsent.textContent = error.message || "Blacklist lookup is temporarily unavailable.";
     blacklistConsent.style.color = "#ffb1bc";

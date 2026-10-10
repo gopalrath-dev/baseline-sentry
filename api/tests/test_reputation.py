@@ -32,7 +32,25 @@ class ReputationValidationTests(unittest.TestCase):
     @patch("app.reputation.get_openphish_urls", return_value={"https://example.test/login"})
     def test_openphish_flags_exact_url_from_cached_feed(self, _mock_feed):
         result = query_openphish("https://example.test/login#ignored")
-        self.assertEqual(result["verdict"], "FLAGGED")
+        self.assertEqual(result["verdict"], "BLACKLISTED")
+
+    @patch("app.reputation.query_openphish")
+    @patch("app.reputation.query_virustotal")
+    def test_single_virustotal_signal_is_caution(self, mock_virustotal, mock_openphish):
+        mock_openphish.return_value = {
+            "provider": "OpenPhish Community Feed",
+            "verdict": "NOT_LISTED",
+            "message": "Not listed",
+        }
+        mock_virustotal.return_value = {
+            "provider": "VirusTotal",
+            "verdict": "FLAGGED",
+            "message": "VirusTotal reports 1 malicious and 0 suspicious engine verdict(s).",
+        }
+        with patch.dict("os.environ", {"VIRUSTOTAL_API_KEY": "test-key"}, clear=True):
+            result = query_reputation("https://example.com")
+        self.assertEqual(result["verdict"], "CAUTION")
+        self.assertEqual(result["source"], "VirusTotal")
 
     @patch("app.reputation.query_openphish")
     def test_raises_when_all_providers_are_unavailable(self, mock_openphish):

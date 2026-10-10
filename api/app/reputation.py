@@ -82,7 +82,7 @@ def query_openphish(url: str) -> dict[str, str]:
     if normalize_url(url) in get_openphish_urls():
         return {
             "provider": "OpenPhish Community Feed",
-            "verdict": "FLAGGED",
+            "verdict": "BLACKLISTED",
             "message": "This exact URL appears in the OpenPhish Community phishing feed.",
         }
     return {
@@ -214,11 +214,25 @@ def query_reputation(url: str) -> dict[str, Any]:
     if not usable:
         raise ReputationError("No threat-reputation provider is currently available. Try again later.")
 
-    flagged = [item for item in usable if item["verdict"] in {"BLACKLISTED", "FLAGGED"}]
+    confirmed = [item for item in usable if item["verdict"] == "BLACKLISTED"]
+    signals = [item for item in usable if item["verdict"] == "FLAGGED"]
+    if confirmed:
+        verdict = "BLACKLISTED"
+        sources = confirmed
+        message = confirmed[0]["message"]
+    elif signals:
+        verdict = "CAUTION"
+        sources = signals
+        message = "A single-provider reputation signal needs verification. " + signals[0]["message"]
+    else:
+        verdict = "NOT_LISTED"
+        sources = usable
+        message = "No configured provider flagged this URL. This is not a guarantee that the URL is safe."
+
     return {
-        "verdict": "BLACKLISTED" if flagged else "NOT_LISTED",
-        "source": " + ".join(item["provider"] for item in usable),
-        "message": flagged[0]["message"] if flagged else "No configured provider flagged this URL. This is not a guarantee that the URL is safe.",
+        "verdict": verdict,
+        "source": " + ".join(item["provider"] for item in sources),
+        "message": message,
         "reference": None,
         "threat": None,
         "tags": [],

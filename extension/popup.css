@@ -101,6 +101,8 @@ h2 { font-size: 14px; }
 .api-button { align-self: center; }
 .api-result { grid-column: 1 / -1; margin: 1px 0 0; color: #87dcca; font-size: 11px; line-height: 1.4; }
 .api-result.error { color: #ffb0b9; }
+.api-result.caution { color: #ffdc88; }
+.reputation-card { border-color: #3b5876; background: linear-gradient(110deg, #101c30, #14243a); }
 button { border: 0; cursor: pointer; font: inherit; }
 .secondary { border: 1px solid #426387; border-radius: 8px; padding: 8px 10px; background: #163252; color: #dcecff; font-size: 11px; font-weight: 700; }
 .secondary:hover { background: #20466f; }

@@ -46,7 +46,7 @@ For broader multi-engine reputation results, create a VirusTotal API key and con
 VIRUSTOTAL_API_KEY=your-private-api-key
 \`\`\`
 
-Never put either value in GitHub, the extension, or the public website. The endpoint is rate-limited to 15 requests per IP address per 10 minutes. When VirusTotal is enabled, the prototype additionally enforces its Community API limit of four lookups per minute. A \`NOT_LISTED\` verdict means neither OpenPhish nor any configured provider flagged the URL; it is not proof that the URL is safe. The VirusTotal integration reads an existing report only; it never submits a new scan.
+Never put either value in GitHub, the extension, or the public website. The endpoint is rate-limited to 15 requests per IP address per 10 minutes. When VirusTotal is enabled, the prototype additionally enforces its Community API limit of four lookups per minute. An exact OpenPhish or URLhaus match is \`BLACKLISTED\`; a VirusTotal-only signal is \`CAUTION\` to reduce false positives. A \`NOT_LISTED\` verdict means neither OpenPhish nor any configured provider flagged the URL; it is not proof that the URL is safe. The VirusTotal integration reads an existing report only; it never submits a new scan.
 
 ## Deploy on Render
 

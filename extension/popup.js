@@ -10,8 +10,11 @@ const trustButton = document.querySelector("#trust-button");
 const refreshButton = document.querySelector("#refresh-button");
 const apiButton = document.querySelector("#api-button");
 const apiResult = document.querySelector("#api-result");
+const reputationButton = document.querySelector("#reputation-button");
+const reputationResult = document.querySelector("#reputation-result");
 const API_BASE_URL = "https://baselinesentry-api.onrender.com";
 const API_CLASSIFY_URL = API_BASE_URL + "/classify";
+const API_REPUTATION_URL = API_BASE_URL + "/reputation";
 
 let currentReport = null;
 
@@ -168,9 +171,75 @@ async function requestApiSecondOpinion() {
   }
 }
 
+function applyBlacklistFinding(result) {
+  if (!currentReport || result.verdict !== "BLACKLISTED") return;
+
+  currentReport.score = 100;
+  currentReport.timeline = currentReport.timeline.filter((event) => event.title !== "Threat reputation blacklist match");
+  currentReport.timeline.push({
+    title: "Threat reputation blacklist match",
+    detail: "Confirmed by " + result.source + ". " + result.message,
+    points: 100,
+    finding: true
+  });
+  render(currentReport);
+}
+
+function applyReputationCaution(result) {
+  if (!currentReport || result.verdict !== "CAUTION") return;
+
+  currentReport.score = Math.max(35, currentReport.score);
+  currentReport.timeline = currentReport.timeline.filter((event) => event.title !== "Threat reputation signal");
+  currentReport.timeline.push({
+    title: "Threat reputation signal",
+    detail: "Needs verification: " + result.source + ". " + result.message,
+    points: 0,
+    finding: true
+  });
+  render(currentReport);
+}
+
+async function requestThreatReputation() {
+  if (!currentReport) return;
+
+  reputationButton.disabled = true;
+  reputationButton.textContent = "Checking…";
+  reputationResult.className = "api-result";
+  reputationResult.textContent = "Checking the current URL with the configured reputation providers…";
+
+  try {
+    const response = await fetch(API_REPUTATION_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: currentReport.url })
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.detail || "Threat-reputation lookup failed.");
+
+    if (result.verdict === "BLACKLISTED") {
+      applyBlacklistFinding(result);
+      reputationResult.textContent = "BLACKLISTED by " + result.source + ". " + result.message;
+      reputationResult.className = "api-result error";
+    } else if (result.verdict === "CAUTION") {
+      applyReputationCaution(result);
+      reputationResult.textContent = "CAUTION from " + result.source + ". " + result.message;
+      reputationResult.className = "api-result caution";
+    } else {
+      reputationResult.textContent = result.source + ": " + result.message;
+    }
+  } catch (error) {
+    reputationResult.className = "api-result error";
+    reputationResult.textContent = error.message || "The online threat-reputation service is temporarily unavailable.";
+  } finally {
+    reputationButton.disabled = false;
+    reputationButton.textContent = "Check reputation";
+  }
+}
+
 function render(report) {
   currentReport = report;
   apiResult.textContent = "";
+  reputationResult.textContent = "";
   siteHost.textContent = report.hostname;
   siteUrl.textContent = report.url;
   scoreEl.textContent = String(report.score);
@@ -234,4 +303,5 @@ trustButton.addEventListener("click", async () => {
 
 refreshButton.addEventListener("click", scan);
 apiButton.addEventListener("click", requestApiSecondOpinion);
+reputationButton.addEventListener("click", requestThreatReputation);
 scan();
