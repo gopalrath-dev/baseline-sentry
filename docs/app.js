@@ -35,6 +35,22 @@ const REPUTATION_API_URL = "https://baselinesentry-api.onrender.com/reputation";
 let checkedUrl = "";
 let currentUrlResult = null;
 
+const hero = document.querySelector(".hero");
+if (hero) {
+  hero.addEventListener("pointermove", (event) => {
+    const bounds = hero.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+    hero.style.setProperty("--pointer-x", `${(x * 26).toFixed(1)}px`);
+    hero.style.setProperty("--pointer-y", `${(y * 20).toFixed(1)}px`);
+  }, { passive: true });
+
+  hero.addEventListener("pointerleave", () => {
+    hero.style.setProperty("--pointer-x", "0px");
+    hero.style.setProperty("--pointer-y", "0px");
+  });
+}
+
 function renderScenario(name) {
   const scenario = scenarios[name];
   score.textContent = scenario.score;

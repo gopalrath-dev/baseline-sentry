@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="BaselineSentry is a privacy-first browser extension for adaptive phishing detection and website trust monitoring." />
     <title>BaselineSentry — Website Trust Monitor</title>
+    <link rel="icon" type="image/png" href="assets/baselinesentry-logo.png" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="site-shell">
       <header class="nav wrap">
         <a class="brand" href="#top" aria-label="BaselineSentry home">
-          <span class="brand-icon">B</span>
+          <img class="brand-icon" src="assets/baselinesentry-logo.png" alt="" />
           <span>Baseline<span>Sentry</span></span>
         </a>
         <nav aria-label="Main navigation">
@@ -24,11 +25,19 @@
       </header>
 
       <main id="top">
-        <section class="hero wrap">
+        <section class="hero">
+          <div class="hero-dot-grid" aria-hidden="true"></div>
+          <div class="hero-watermark" aria-hidden="true">TRUST</div>
+          <div class="hero-security-field" aria-hidden="true">
+            <span class="field-ring ring-a"></span><span class="field-ring ring-b"></span><span class="field-ring ring-c"></span>
+            <span class="field-path path-a"></span><span class="field-path path-b"></span><span class="field-path path-c"></span>
+            <span class="field-node field-url">URL</span><span class="field-node field-dom">DOM</span><span class="field-node field-history">BASELINE</span>
+          </div>
+          <div class="hero-content wrap">
           <div class="hero-copy">
             <p class="eyebrow"><i></i> ADAPTIVE PHISHING DEFENCE</p>
             <h1>Trust the website.<br /><em>Verify the change.</em></h1>
-            <p class="hero-text">BaselineSentry learns a website's normal security structure locally, then alerts you when a login form, destination, or behaviour unexpectedly changes.</p>
+            <p class="hero-text">BaselineSentry learns the normal security structure of a website locally, then highlights meaningful changes before they become a phishing trap.</p>
             <div class="hero-actions">
               <a class="button" href="#demo">See adaptive detection <span>↓</span></a>
               <a class="text-link" href="#features">Explore capabilities <span>→</span></a>
@@ -56,6 +65,7 @@
               <div class="signal-row faded"><i>•</i><span>Watching for behavioural drift</span></div>
             </div>
             <div class="float-tag"><i></i> Baseline protected</div>
+          </div>
           </div>
         </section>
 
@@ -189,7 +199,7 @@
       </main>
 
       <footer class="wrap">
-        <a class="brand" href="#top"><span class="brand-icon">B</span><span>Baseline<span>Sentry</span></span></a>
+        <a class="brand" href="#top"><img class="brand-icon" src="assets/baselinesentry-logo.png" alt="" /><span>Baseline<span>Sentry</span></span></a>
         <p>Adaptive Website Trust Monitor · Hackathon 2026</p>
         <a href="https://github.com/gopalrath-dev/baseline-sentry" target="_blank" rel="noreferrer">GitHub ↗</a>
       </footer>
