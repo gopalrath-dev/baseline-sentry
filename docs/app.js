@@ -188,7 +188,7 @@ urlCheckForm.addEventListener("submit", (event) => {
     showUrlResult(inspectUrl(normalized));
     checkedUrl = normalized;
     blacklistButton.disabled = false;
-    blacklistConsent.textContent = "Optional: this sends the exact URL only to configured reputation providers (URLhaus and/or VirusTotal). BaselineSentry does not retain it.";
+    blacklistConsent.textContent = "Optional: the URL is checked against the cached OpenPhish feed and is sent only to configured URLhaus/VirusTotal providers. BaselineSentry does not retain it.";
   } catch {
     urlResult.className = "url-result high";
     urlResult.replaceChildren();

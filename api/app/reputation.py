@@ -9,6 +9,7 @@ from __future__ import annotations
 import base64
 import json
 import os
+from time import monotonic
 from typing import Any
 from urllib.error import HTTPError
 from urllib.parse import urlencode, urlparse
@@ -16,6 +17,10 @@ from urllib.request import Request, urlopen
 
 URLHAUS_LOOKUP_URL = "https://urlhaus-api.abuse.ch/v1/url/"
 VIRUSTOTAL_URL_PREFIX = "https://www.virustotal.com/api/v3/urls/"
+OPENPHISH_FEED_URL = "https://openphish.com/feed.txt"
+OPENPHISH_CACHE_SECONDS = 12 * 60 * 60
+_openphish_urls: set[str] = set()
+_openphish_cache_updated_at = 0.0
 
 
 class ReputationError(Exception):
@@ -29,6 +34,62 @@ def validate_http_url(value: str) -> str:
     if len(value) > 2048:
         raise ReputationError("The submitted URL is too long.")
     return value.strip()
+
+
+def normalize_url(value: str) -> str:
+    """Normalize only what is needed for exact threat-feed matching."""
+
+    parsed = urlparse(value.strip())
+    hostname = (parsed.hostname or "").lower()
+    port = parsed.port
+    netloc = hostname
+    if port and not ((parsed.scheme == "http" and port == 80) or (parsed.scheme == "https" and port == 443)):
+        netloc += f":{port}"
+    path = parsed.path or "/"
+    return f"{parsed.scheme.lower()}://{netloc}{path}" + (f"?{parsed.query}" if parsed.query else "")
+
+
+def get_openphish_urls() -> set[str]:
+    """Fetch the limited Community Feed at most once every 12 hours."""
+
+    global _openphish_cache_updated_at, _openphish_urls
+    now = monotonic()
+    if _openphish_urls and now - _openphish_cache_updated_at < OPENPHISH_CACHE_SECONDS:
+        return _openphish_urls
+
+    request = Request(
+        OPENPHISH_FEED_URL,
+        headers={"User-Agent": "BaselineSentry/0.1 (+https://gopalrath-dev.github.io/baseline-sentry/)"},
+        method="GET",
+    )
+    try:
+        with urlopen(request, timeout=10) as response:  # nosec B310: fixed OpenPhish community feed endpoint
+            lines = response.read().decode("utf-8", errors="replace").splitlines()
+    except Exception as error:
+        raise ReputationError("OpenPhish community feed could not be reached.") from error
+
+    fetched_urls = {normalize_url(line) for line in lines if line.strip().startswith(("http://", "https://"))}
+    if not fetched_urls:
+        raise ReputationError("OpenPhish community feed returned no usable URLs.")
+    _openphish_urls = fetched_urls
+    _openphish_cache_updated_at = now
+    return _openphish_urls
+
+
+def query_openphish(url: str) -> dict[str, str]:
+    """Check the submitted URL against the free, cached OpenPhish Community Feed."""
+
+    if normalize_url(url) in get_openphish_urls():
+        return {
+            "provider": "OpenPhish Community Feed",
+            "verdict": "FLAGGED",
+            "message": "This exact URL appears in the OpenPhish Community phishing feed.",
+        }
+    return {
+        "provider": "OpenPhish Community Feed",
+        "verdict": "NOT_LISTED",
+        "message": "Not present in the cached OpenPhish Community feed. This is not a guarantee that the URL is safe.",
+    }
 
 
 def query_urlhaus(url: str) -> dict[str, Any]:
@@ -128,6 +189,10 @@ def query_reputation(url: str) -> dict[str, Any]:
     """Combine configured opt-in providers without treating an unlisted URL as safe."""
 
     providers: list[dict[str, str]] = []
+    try:
+        providers.append(query_openphish(url))
+    except ReputationError as error:
+        providers.append({"provider": "OpenPhish Community Feed", "verdict": "UNAVAILABLE", "message": str(error)})
     if os.getenv("URLHAUS_AUTH_KEY"):
         try:
             result = query_urlhaus(url)
@@ -147,7 +212,7 @@ def query_reputation(url: str) -> dict[str, Any]:
 
     usable = [item for item in providers if item["verdict"] != "UNAVAILABLE"]
     if not usable:
-        raise ReputationError("Blacklist lookup is not configured yet. Add a URLhaus or VirusTotal API key in Render.")
+        raise ReputationError("No threat-reputation provider is currently available. Try again later.")
 
     flagged = [item for item in usable if item["verdict"] in {"BLACKLISTED", "FLAGGED"}]
     return {

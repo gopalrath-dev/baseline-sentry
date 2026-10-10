@@ -89,7 +89,7 @@ def enforce_reputation_rate_limit(request: Request) -> None:
     while recent and now - recent[0] > RATE_WINDOW_SECONDS:
         recent.popleft()
     if len(recent) >= RATE_LIMIT:
-        raise HTTPException(status_code=429, detail="Too many blacklist checks. Try again later.")
+        raise HTTPException(status_code=429, detail="Too many threat-reputation checks. Try again later.")
     recent.append(now)
 
     # VirusTotal's community key is limited to four API calls per minute.

@@ -30,7 +30,9 @@ The versioned coefficients are intentionally human-readable in \`app/model_weigh
 
 ## Optional threat-reputation lookup
 
-\`POST /reputation\` is deliberately separate from \`/classify\`. It is only called after a website visitor explicitly chooses a malware blacklist lookup. The exact submitted URL goes only to the configured threat-intelligence providers; BaselineSentry does not store it.
+\`POST /reputation\` is deliberately separate from \`/classify\`. It is only called after a website visitor explicitly chooses a threat-reputation lookup. The URL is checked against the cached OpenPhish Community Feed, and is sent only to any configured private providers; BaselineSentry does not store it.
+
+OpenPhish needs no account, billing profile, or key. Its free Community Feed is cached in the API for 12 hours, matching its published update schedule. It provides known phishing URLs only, so an absent result is never treated as safe.
 
 To enable it, create a free abuse.ch account and Auth-Key, then set it only in your hosting provider's secret environment variables:
 
@@ -44,7 +46,7 @@ For broader multi-engine reputation results, create a VirusTotal API key and con
 VIRUSTOTAL_API_KEY=your-private-api-key
 \`\`\`
 
-Never put either value in GitHub, the extension, or the public website. The endpoint is rate-limited to 15 requests per IP address per 10 minutes. When VirusTotal is enabled, the prototype additionally enforces its Community API limit of four lookups per minute. A \`NOT_LISTED\` verdict means no configured provider flagged the URL; it is not proof that the URL is safe. The VirusTotal integration reads an existing report only; it never submits a new scan.
+Never put either value in GitHub, the extension, or the public website. The endpoint is rate-limited to 15 requests per IP address per 10 minutes. When VirusTotal is enabled, the prototype additionally enforces its Community API limit of four lookups per minute. A \`NOT_LISTED\` verdict means neither OpenPhish nor any configured provider flagged the URL; it is not proof that the URL is safe. The VirusTotal integration reads an existing report only; it never submits a new scan.
 
 ## Deploy on Render
 
