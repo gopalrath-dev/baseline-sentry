@@ -10,6 +10,7 @@ This first working extension provides:
 - Deceptive-domain indicators
 - Cross-origin sensitive-form warnings
 - Local trusted-site baselines
+- Redirect and third-party resource drift monitoring
 - An explainable evidence timeline
 
 All current analysis happens inside Chrome. The extension never reads or stores form values or passwords.

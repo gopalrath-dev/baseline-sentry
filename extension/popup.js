@@ -28,6 +28,8 @@ function formProfile(report) {
     sensitiveFormCount: report.forms.filter((form) => form.sensitive).length,
     formActionOrigins: report.forms.map((form) => form.actionOrigin).sort(),
     crossOriginSensitiveForm: report.forms.some((form) => form.sensitive && form.crossOrigin),
+    resourceOrigins: report.resourceOrigins,
+    redirectCount: report.redirectCount,
     savedAt: new Date().toISOString()
   };
 }
@@ -70,6 +72,27 @@ async function applyBaseline(report) {
       title: "Form destination changed",
       detail: "A form now submits to a different origin than the local trusted baseline.",
       points: 30,
+      finding: true
+    });
+  }
+
+  if (Array.isArray(baseline.resourceOrigins)) {
+    const unfamiliarOrigins = current.resourceOrigins.filter((origin) => !baseline.resourceOrigins.includes(origin));
+    if (unfamiliarOrigins.length >= 3) {
+      additions.push({
+        title: "New third-party resource origins",
+        detail: unfamiliarOrigins.length + " unfamiliar external origins appeared since this site's trusted baseline.",
+        points: 12,
+        finding: true
+      });
+    }
+  }
+
+  if (typeof baseline.redirectCount === "number" && baseline.redirectCount === 0 && current.redirectCount >= 2) {
+    additions.push({
+      title: "Redirect behaviour changed",
+      detail: "This visit passed through " + current.redirectCount + " redirects, unlike the trusted baseline.",
+      points: 15,
       finding: true
     });
   }

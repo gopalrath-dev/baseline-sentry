@@ -50,10 +50,30 @@
     return null;
   }
 
+  function thirdPartyResourceOrigins() {
+    const origins = new Set();
+
+    performance.getEntriesByType("resource").forEach((entry) => {
+      try {
+        const resourceUrl = new URL(entry.name);
+        if ((resourceUrl.protocol === "https:" || resourceUrl.protocol === "http:") && resourceUrl.origin !== location.origin) {
+          origins.add(resourceUrl.origin);
+        }
+      } catch {
+        // Ignore malformed or browser-internal resource entries.
+      }
+    });
+
+    return Array.from(origins).sort().slice(0, 50);
+  }
+
   function scanPage() {
     const parsedUrl = new URL(location.href);
     const hostname = parsedUrl.hostname;
     const forms = Array.from(document.forms).map(formMetadata);
+    const resourceOrigins = thirdPartyResourceOrigins();
+    const navigationEntry = performance.getEntriesByType("navigation")[0];
+    const redirectCount = Number(navigationEntry?.redirectCount || 0);
     const timeline = [{
       title: "Page scanned locally",
       detail: "Analysed URL and form metadata without reading input values.",
@@ -99,6 +119,26 @@
       timeline.push({ title: "Cross-origin form destination", detail: "A sensitive form submits to a different origin from the page.", points: 25, finding: true });
     }
 
+    if (redirectCount >= 3) {
+      score += 15;
+      timeline.push({
+        title: "Multiple redirects observed",
+        detail: "The browser recorded " + redirectCount + " redirects before this page loaded.",
+        points: 15,
+        finding: true
+      });
+    }
+
+    if (resourceOrigins.length >= 8) {
+      score += 8;
+      timeline.push({
+        title: "Many external resource origins",
+        detail: "This page loads resources from " + resourceOrigins.length + " third-party origins.",
+        points: 8,
+        finding: true
+      });
+    }
+
     if (!timeline.some((event) => event.finding)) {
       timeline.push({ title: "No high-confidence signal found", detail: "No risky URL or form pattern was detected in this initial scan.", points: 0, finding: false });
     }
@@ -107,6 +147,8 @@
       url: location.href,
       hostname,
       forms,
+      resourceOrigins,
+      redirectCount,
       score: Math.min(100, score),
       timeline
     };
@@ -166,4 +208,3 @@
     if (message && message.type === "BASELINE_SENTRY_SCAN") sendResponse(scanPage());
   });
 })();
-
