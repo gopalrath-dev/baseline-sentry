@@ -1,0 +1,28 @@
+{
+  "model_version": "0.1.0",
+  "model_type": "transparent-logistic-prototype",
+  "intercept": -3.25,
+  "coefficients": {
+    "has_sensitive_form": 0.45,
+    "cross_origin_sensitive_form": 1.55,
+    "form_destination_changed": 1.85,
+    "new_sensitive_form": 1.65,
+    "deceptive_brand_domain": 1.2,
+    "punycode_or_ip_host": 1.05,
+    "redirect_to_new_domain": 0.8,
+    "new_third_party_origins": 0.16,
+    "excessive_hostname_hyphens": 0.28
+  },
+  "feature_notes": {
+    "has_sensitive_form": "A login or payment form is present; this alone is not a high-risk finding.",
+    "cross_origin_sensitive_form": "A sensitive form sends data to a different origin.",
+    "form_destination_changed": "A current form action differs from the user-approved local baseline.",
+    "new_sensitive_form": "A credential or payment form appeared after the local baseline was saved.",
+    "deceptive_brand_domain": "A brand-like hostname is not controlled by the expected brand domain.",
+    "punycode_or_ip_host": "The host is punycode or a raw IP address.",
+    "redirect_to_new_domain": "A redirect ends at an unfamiliar domain.",
+    "new_third_party_origins": "Count of third-party origins not present in the local baseline.",
+    "excessive_hostname_hyphens": "A hostname uses an unusually high number of hyphens."
+  }
+}
+
