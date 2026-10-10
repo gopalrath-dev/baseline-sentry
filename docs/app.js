@@ -29,6 +29,10 @@ const list = document.querySelector("#evidence-list");
 const urlCheckForm = document.querySelector("#url-check-form");
 const urlCheckInput = document.querySelector("#url-check-input");
 const urlResult = document.querySelector("#url-result");
+const blacklistButton = document.querySelector("#blacklist-button");
+const blacklistConsent = document.querySelector("#blacklist-consent");
+const REPUTATION_API_URL = "https://baselinesentry-api.onrender.com/reputation";
+let checkedUrl = "";
 
 function renderScenario(name) {
   const scenario = scenarios[name];
@@ -82,6 +86,10 @@ function inspectUrl(rawValue) {
   const hostname = parsed.hostname.toLowerCase();
   const signals = [];
   let score = 0;
+  const uncommonTlds = new Set([
+    "click", "cfd", "cyou", "fit", "futbol", "gq", "icu", "info", "live",
+    "loan", "monster", "online", "quest", "rest", "sbs", "site", "stream", "support", "top", "xyz"
+  ]);
 
   const brandDomains = {
     paypal: "paypal.com",
@@ -111,6 +119,17 @@ function inspectUrl(rawValue) {
   if (hostname.split(".").length >= 5) {
     score += 8;
     signals.push("Many subdomains");
+  }
+  const labels = hostname.split(".");
+  const leftMostLabel = labels[0] || "";
+  if (/\d/.test(leftMostLabel)) {
+    score += 8;
+    signals.push("Numeric or rotating subdomain");
+  }
+  const topLevelDomain = labels.at(-1);
+  if (uncommonTlds.has(topLevelDomain)) {
+    score += 8;
+    signals.push("Uncommon top-level domain");
   }
   if (parsed.username || parsed.password || rawValue.includes("@")) {
     score += 16;
@@ -165,7 +184,11 @@ function showUrlResult(result) {
 urlCheckForm.addEventListener("submit", (event) => {
   event.preventDefault();
   try {
-    showUrlResult(inspectUrl(urlCheckInput.value));
+    const normalized = /^https?:\/\//i.test(urlCheckInput.value.trim()) ? urlCheckInput.value.trim() : "https://" + urlCheckInput.value.trim();
+    showUrlResult(inspectUrl(normalized));
+    checkedUrl = normalized;
+    blacklistButton.disabled = false;
+    blacklistConsent.textContent = "Optional: this sends the exact URL only to configured reputation providers (URLhaus and/or VirusTotal). BaselineSentry does not retain it.";
   } catch {
     urlResult.className = "url-result high";
     urlResult.replaceChildren();
@@ -179,5 +202,37 @@ urlCheckForm.addEventListener("submit", (event) => {
     text.textContent = "Enter a complete domain such as example.com or https://example.com.";
     content.append(heading, text);
     urlResult.append(icon, content);
+    checkedUrl = "";
+    blacklistButton.disabled = true;
+    blacklistConsent.textContent = "Enter a valid address before requesting a blacklist lookup.";
+  }
+});
+
+blacklistButton.addEventListener("click", async () => {
+  if (!checkedUrl) return;
+  blacklistButton.disabled = true;
+  blacklistButton.textContent = "Checking blacklist…";
+  blacklistConsent.textContent = "Checking configured reputation providers…";
+
+  try {
+    const response = await fetch(REPUTATION_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: checkedUrl })
+    });
+    const body = await response.json();
+    if (!response.ok) throw new Error(body.detail || "Blacklist lookup failed.");
+
+    const blacklisted = body.verdict === "BLACKLISTED";
+    blacklistConsent.textContent = blacklisted
+      ? "BLACKLISTED by " + body.source + ". " + body.message
+      : body.source + ": " + body.message;
+    blacklistConsent.style.color = blacklisted ? "#ffb49e" : "#9dc9bf";
+  } catch (error) {
+    blacklistConsent.textContent = error.message || "Blacklist lookup is temporarily unavailable.";
+    blacklistConsent.style.color = "#ffb1bc";
+  } finally {
+    blacklistButton.disabled = false;
+    blacklistButton.textContent = "Check threat reputation";
   }
 });

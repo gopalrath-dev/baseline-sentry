@@ -28,6 +28,24 @@ Then open \`http://127.0.0.1:8000/docs\` for the interactive API documentation.
 
 The versioned coefficients are intentionally human-readable in \`app/model_weights.json\`. They are calibrated prototype weights, not a claim of a production-trained model.
 
+## Optional threat-reputation lookup
+
+\`POST /reputation\` is deliberately separate from \`/classify\`. It is only called after a website visitor explicitly chooses a malware blacklist lookup. The exact submitted URL goes only to the configured threat-intelligence providers; BaselineSentry does not store it.
+
+To enable it, create a free abuse.ch account and Auth-Key, then set it only in your hosting provider's secret environment variables:
+
+\`\`\`text
+URLHAUS_AUTH_KEY=your-private-auth-key
+\`\`\`
+
+For broader multi-engine reputation results, create a VirusTotal API key and configure it in Render as well:
+
+\`\`\`text
+VIRUSTOTAL_API_KEY=your-private-api-key
+\`\`\`
+
+Never put either value in GitHub, the extension, or the public website. The endpoint is rate-limited to 15 requests per IP address per 10 minutes. When VirusTotal is enabled, the prototype additionally enforces its Community API limit of four lookups per minute. A \`NOT_LISTED\` verdict means no configured provider flagged the URL; it is not proof that the URL is safe. The VirusTotal integration reads an existing report only; it never submits a new scan.
+
 ## Deploy on Render
 
 The repository includes a root \`render.yaml\` blueprint with the correct API root directory, build command, start command, health check, and pinned Python version.

@@ -97,6 +97,10 @@ nav a:hover, footer a:hover, .text-link:hover { color: var(--cyan); }
 .url-result li { padding: 4px 6px; border: 1px solid #4a6682; border-radius: 99px; color: #b9cfe2; font-size: 9px; }
 .full-scan-note { margin: 14px 1px 0; color: #8aa5c1; font-size: 10px; line-height: 1.5; }
 .full-scan-note b { color: #b8d5ea; }
+.blacklist-button { width: 100%; margin-top: 12px; border: 1px solid #6792b7; border-radius: 8px; padding: 10px 12px; color: #d4eaff; background: #132c45; cursor: pointer; font: inherit; font-size: 11px; font-weight: 800; }
+.blacklist-button:not(:disabled):hover { border-color: var(--cyan); color: #061a1e; background: var(--cyan); }
+.blacklist-button:disabled { cursor: not-allowed; opacity: .5; }
+.blacklist-consent { margin: 8px 1px 0; color: #8ca8c3; font-size: 10px; line-height: 1.45; }
 .section { padding: 110px 0; }
 .section-heading { display: grid; grid-template-columns: 1fr 1.2fr .75fr; align-items: end; gap: 30px; margin-bottom: 40px; }
 .section-heading h2 { font-size: 38px; }

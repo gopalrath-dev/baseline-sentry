@@ -1,8 +1,9 @@
 node_modules/
 dist/
+__pycache__/
+*.py[cod]
 .env
 .env.*
 !.env.example
 *.pem
 .DS_Store
-
