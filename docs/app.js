@@ -33,6 +33,7 @@ const blacklistButton = document.querySelector("#blacklist-button");
 const blacklistConsent = document.querySelector("#blacklist-consent");
 const REPUTATION_API_URL = "https://baselinesentry-api.onrender.com/reputation";
 let checkedUrl = "";
+let currentUrlResult = null;
 
 function renderScenario(name) {
   const scenario = scenarios[name];
@@ -181,11 +182,29 @@ function showUrlResult(result) {
   urlResult.append(icon, content);
 }
 
+function showBlacklistOverride(source, providerMessage) {
+  if (!currentUrlResult) return;
+  showUrlResult({
+    ...currentUrlResult,
+    score: 100,
+    level: "HIGH",
+    signals: [
+      "Confirmed blacklist detection: " + source,
+      ...currentUrlResult.signals
+    ]
+  });
+  const resultText = urlResult.querySelector("small");
+  if (resultText) {
+    resultText.textContent = "Actual registrable domain: " + currentUrlResult.domain + ". " + providerMessage;
+  }
+}
+
 urlCheckForm.addEventListener("submit", (event) => {
   event.preventDefault();
   try {
     const normalized = /^https?:\/\//i.test(urlCheckInput.value.trim()) ? urlCheckInput.value.trim() : "https://" + urlCheckInput.value.trim();
-    showUrlResult(inspectUrl(normalized));
+    currentUrlResult = inspectUrl(normalized);
+    showUrlResult(currentUrlResult);
     checkedUrl = normalized;
     blacklistButton.disabled = false;
     blacklistConsent.textContent = "Optional: the URL is checked against the cached OpenPhish feed and is sent only to configured URLhaus/VirusTotal providers. BaselineSentry does not retain it.";
@@ -203,6 +222,7 @@ urlCheckForm.addEventListener("submit", (event) => {
     content.append(heading, text);
     urlResult.append(icon, content);
     checkedUrl = "";
+    currentUrlResult = null;
     blacklistButton.disabled = true;
     blacklistConsent.textContent = "Enter a valid address before requesting a blacklist lookup.";
   }
@@ -224,6 +244,7 @@ blacklistButton.addEventListener("click", async () => {
     if (!response.ok) throw new Error(body.detail || "Blacklist lookup failed.");
 
     const blacklisted = body.verdict === "BLACKLISTED";
+    if (blacklisted) showBlacklistOverride(body.source, body.message);
     blacklistConsent.textContent = blacklisted
       ? "BLACKLISTED by " + body.source + ". " + body.message
       : body.source + ": " + body.message;
