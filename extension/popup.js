@@ -1,6 +1,7 @@
 const siteHost = document.querySelector("#site-host");
 const siteUrl = document.querySelector("#site-url");
 const scoreEl = document.querySelector("#score");
+const scoreOrbit = document.querySelector("#score-orbit");
 const badgeEl = document.querySelector("#risk-badge");
 const timelineEl = document.querySelector("#timeline");
 const errorEl = document.querySelector("#error");
@@ -94,6 +95,8 @@ function render(report) {
   const level = riskLevel(report.score);
   badgeEl.textContent = level;
   badgeEl.className = "risk-badge " + level.toLowerCase();
+  scoreOrbit.className = "score-orbit " + level.toLowerCase();
+  scoreOrbit.style.setProperty("--risk-angle", (report.score * 3.6) + "deg");
 
   timelineEl.replaceChildren();
   report.timeline.forEach((event) => {
@@ -148,4 +151,3 @@ trustButton.addEventListener("click", async () => {
 
 refreshButton.addEventListener("click", scan);
 scan();
-

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Northwind Member Portal</title>
+    <style>
+      :root { color-scheme: dark; font-family: Inter, system-ui, sans-serif; background: #091729; color: #eaf3ff; }
+      body { display: grid; min-height: 100vh; margin: 0; place-items: center; }
+      main { width: min(400px, calc(100vw - 40px)); padding: 34px; border: 1px solid #28496b; border-radius: 18px; background: #10243c; box-shadow: 0 24px 70px #02081480; }
+      .mark { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 12px; background: #65dfc4; color: #10243c; font-weight: 900; }
+      h1 { font-size: 24px; margin: 18px 0 5px; }
+      p { color: #a7bdd6; line-height: 1.5; }
+      label { display: grid; gap: 7px; margin-top: 17px; color: #d7e8fa; font-size: 13px; font-weight: 700; }
+      input { border: 1px solid #365979; border-radius: 8px; padding: 11px; background: #091729; color: #fff; }
+      button { width: 100%; margin-top: 22px; border: 0; border-radius: 8px; padding: 12px; background: #65dfc4; color: #10243c; font-weight: 800; }
+      .demo-note { margin-top: 24px; border-top: 1px solid #28496b; padding-top: 16px; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="mark">N</div>
+      <h1>Northwind Member Portal</h1>
+      <p>Sign in to view your account overview.</p>
+      <form action="trusted-login.html" method="get">
+        <label>Email address <input type="email" name="email" autocomplete="email" /></label>
+        <label>Password <input type="password" name="password" autocomplete="current-password" /></label>
+        <button type="submit">Sign in</button>
+      </form>
+      <p class="demo-note">Safe BaselineSentry demo page. Do not enter real credentials.</p>
+    </main>
+  </body>
+</html>

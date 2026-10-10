@@ -32,4 +32,3 @@ For the first test, open a normal site, choose **Trust current structure**, then
 4. Add an opt-in FastAPI classifier API.
 5. Add fixtures and automated tests.
 6. Publish a public Chrome Web Store listing after security and privacy review.
-

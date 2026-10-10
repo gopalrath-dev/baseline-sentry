@@ -14,7 +14,24 @@
           <p class="eyebrow">WEBSITE TRUST MONITOR</p>
           <h1>BaselineSentry</h1>
         </div>
+        <span class="live-indicator"><i></i> LIVE</span>
       </header>
+
+      <section class="sentinel-visual" aria-label="Adaptive trust visualisation">
+        <div class="radar radar-one"></div>
+        <div class="radar radar-two"></div>
+        <div class="radar-sweep"></div>
+        <div class="shield">
+          <svg viewBox="0 0 64 72" aria-hidden="true">
+            <path d="M32 3 57 12v19c0 17-10.2 30.3-25 37.5C17.2 61.3 7 48 7 31V12L32 3Z"></path>
+            <path class="shield-check" d="m20 35 8 8 17-19"></path>
+          </svg>
+        </div>
+        <div class="signal-node node-a"></div>
+        <div class="signal-node node-b"></div>
+        <div class="signal-node node-c"></div>
+        <p><strong>Adaptive protection</strong><span>Watching for unexpected site changes</span></p>
+      </section>
 
       <section class="target-card">
         <p class="label">CURRENT SITE</p>
@@ -23,9 +40,15 @@
       </section>
 
       <section class="risk-card">
-        <div>
-          <p class="label">RISK SCORE</p>
-          <p id="score" class="score">—</p>
+        <div id="score-orbit" class="score-orbit">
+          <div class="score-core">
+            <p class="label">RISK</p>
+            <p id="score" class="score">—</p>
+          </div>
+        </div>
+        <div class="risk-summary">
+          <p class="label">CURRENT ASSESSMENT</p>
+          <p>Signals are explained below, not hidden behind a score.</p>
         </div>
         <div id="risk-badge" class="risk-badge">ANALYSING</div>
       </section>
@@ -52,4 +75,3 @@
     <script src="popup.js"></script>
   </body>
 </html>
-
