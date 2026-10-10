@@ -6,11 +6,11 @@
 
 *Trust the website. Verify the change.*
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-72E7CE?style=for-the-badge&logo=vercel&logoColor=07111F)](https://baseline-sentry-docs.vercel.app/#demo)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-72E7CE?style=for-the-badge&logo=vercel&logoColor=07111F)](https://baseline-sentry-docs.vercel.app/)
 [![API](https://img.shields.io/badge/API-Render-83ADFF?style=for-the-badge&logo=render&logoColor=07111F)](https://baselinesentry-api.onrender.com/health)
 [![Privacy](https://img.shields.io/badge/Privacy-Local--First-72E7CE?style=for-the-badge&logo=shield&logoColor=07111F)](#privacy-and-safety)
 
-**[🌐 Open live demo](https://baseline-sentry-docs.vercel.app/#demo)** · **[🔎 Explore features](#included-features)** · **[🔌 Install extension](#run-locally-in-chrome)**
+**[🌐 Open live demo](https://baseline-sentry-docs.vercel.app/)** · **[🔎 Explore features](#included-features)** · **[🔌 Install extension](#run-locally-in-chrome)**
 
 </div>
 
@@ -23,11 +23,11 @@ BaselineSentry is a privacy-first phishing defence system that detects phishing 
 | 🌐 Public website | 🧩 Browser extension |
 | --- | --- |
 | Mobile-friendly URL checker, interactive demo, system architecture, and privacy explanation. | Automatic page scanning, form warnings, adaptive trust monitoring, and an evidence timeline on desktop Chromium browsers. |
-| [Open live demo →](https://baseline-sentry-docs.vercel.app/#demo) | Load the local `extension/` folder in Chrome or Edge. |
+| [Open live demo →](https://baseline-sentry-docs.vercel.app/) | Load the local `extension/` folder in Chrome or Edge. |
 
 ## Live demo
 
-**Public website:** [baseline-sentry-docs.vercel.app](https://baseline-sentry-docs.vercel.app/#demo)
+**Public website:** [baseline-sentry-docs.vercel.app](https://baseline-sentry-docs.vercel.app/)
 
 The responsive public website works on desktop and mobile browsers. It includes a local URL checker, interactive risk walkthrough, system architecture, and privacy information. The browser extension provides the full automatic in-page scanning and adaptive trust-monitoring experience on desktop Chromium browsers.
 
@@ -91,7 +91,7 @@ For the first test, open a normal site, choose **Trust current structure**, then
 
 | Component | Host | Link |
 | --- | --- | --- |
-| 🌐 Public website | Vercel | [Open BaselineSentry](https://baseline-sentry-docs.vercel.app/#demo) |
+| 🌐 Public website | Vercel | [Open BaselineSentry](https://baseline-sentry-docs.vercel.app/) |
 | ☁️ Threat-classification API | Render | [Check API health](https://baselinesentry-api.onrender.com/health) |
 | 🧩 Extension | Chrome / Edge | Load `extension/` locally during development |
 
